@@ -90,18 +90,21 @@ export function TodoList({
   }
 
   async function handleRemoveTodo(todoId: number) {
+    setEditingTodosId([...editingTodosId, todoId]);
     try {
-      setEditingTodosId([...editingTodosId, todoId]);
       await deleteTodo(todoId);
-      setEditingTodosId(editingTodosId.filter(id => id !== todoId));
-      setTodos(todos.filter(t => t.id !== todoId));
-      setFilteredTodos(filteredTodos.filter(t => t.id !== todoId));
-      setSelectedTodo(null);
+      setTimeout(() => {
+        setEditingTodosId(editingTodosId.filter(id => id !== todoId));
+        setTodos(todos.filter(t => t.id !== todoId));
+        setFilteredTodos(filteredTodos.filter(t => t.id !== todoId));
+        setSelectedTodo(null);
+      }, 1000);
     } catch (e) {
       setError('Unable to delete a todo');
       setSelectedTodo(todos.find(t => t.id === todoId) || null);
       TodoTitleFieldRef.current?.focus();
-      setEditingTodosId([]);
+    } finally {
+      setEditingTodosId(editingTodosId.filter(id => id !== todoId));
     }
   }
 
