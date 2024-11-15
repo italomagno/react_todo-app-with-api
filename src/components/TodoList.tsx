@@ -90,6 +90,20 @@ export function TodoList({
   }
 
   async function handleRemoveTodo(todoId: number) {
+    try {
+      setEditingTodosId([...editingTodosId, todoId]);
+      await deleteTodo(todoId);
+      setEditingTodosId(editingTodosId.filter(id => id !== todoId));
+      setTodos(todos.filter(t => t.id !== todoId));
+      setFilteredTodos(filteredTodos.filter(t => t.id !== todoId));
+    } catch (e) {
+      setError('Unable to delete a todo');
+      setEditingTodosId(editingTodosId.filter(id => id !== todoId));
+    }
+  }
+
+  /*
+  async function handleRemoveTodo(todoId: number) {
     setEditingTodosId([...editingTodosId, todoId]);
     try {
       await deleteTodo(todoId);
@@ -107,7 +121,7 @@ export function TodoList({
       setEditingTodosId(editingTodosId.filter(id => id !== todoId));
     }
   }
-
+ */
   async function handleEditTodoTitle(
     e: React.FormEvent<HTMLFormElement>,
     todo: Todo,
