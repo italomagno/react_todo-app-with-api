@@ -52,13 +52,13 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (filter === 'completed') {
-      setFilteredTodos(filteredTodos.filter(t => t.completed));
+      setFilteredTodos(prev => prev.filter(t => t.completed));
     }
 
     if (filter === 'active') {
-      setFilteredTodos(filteredTodos.filter(t => !t.completed));
+      setFilteredTodos(prev => prev.filter(t => !t.completed));
     }
-  }, [filter, filteredTodos.length, todos.length]);
+  }, [filter, filteredTodos, todos]);
 
   if (!USER_ID) {
     return <UserWarning />;

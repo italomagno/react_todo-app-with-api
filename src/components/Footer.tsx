@@ -24,7 +24,7 @@ export function Footer({
   filter,
   setFilter,
 }: FooterProps) {
-  async function handleFilterTodos(filterString: string) {
+  function handleFilterTodos(filterString: string) {
     setFilter(filterString);
     switch (filterString) {
       case 'all':

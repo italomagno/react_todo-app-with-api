@@ -77,54 +77,39 @@ export function Header({
     }
   }
 
-  async function handleToggleAllTodos() {
-    const sucessfulUpdatedTodo: number[] = [];
+  function handleToggleAllTodos() {
+    const successfulUpdatedTodo: number[] = [];
     const hasAllSameStatus = todos.every(t => t.completed);
+    const todosToUpdate = hasAllSameStatus
+      ? todos
+      : todos.filter(t => !t.completed);
 
-    hasAllSameStatus
-      ? setEditingTodosId([...editingTodosId, ...todos.map(t => t.id)])
-      : setEditingTodosId([
-          ...editingTodosId,
-          ...todos.filter(t => !t.completed).map(t => t.id),
-        ]);
+    setEditingTodosId([...editingTodosId, ...todosToUpdate.map(t => t.id)]);
 
-    try {
-      for (const todo of todos) {
-        if (hasAllSameStatus) {
-          await updateTodo({
-            ...todo,
-            completed: !todo.completed,
-          });
-          sucessfulUpdatedTodo.push(todo.id);
-        } else {
-          if (todo.completed) {
-            continue;
-          }
+    const updatePromises = todosToUpdate.map(todo =>
+      updateTodo({
+        ...todo,
+        completed: !todo.completed,
+      })
+        .then(res => {
+          successfulUpdatedTodo.push(res.id);
+        })
+        .catch(() => {
+          setError('Unable to update todo');
+        }),
+    );
 
-          await updateTodo({
-            ...todo,
-            completed: !todo.completed,
-          });
-          sucessfulUpdatedTodo.push(todo.id);
-        }
+    Promise.all(updatePromises).then(() => {
+      const newTodosUpdated = todos.map(t =>
+        successfulUpdatedTodo.includes(t.id)
+          ? { ...t, completed: !t.completed }
+          : t,
+      );
 
-        sucessfulUpdatedTodo.push(todo.id);
-      }
-    } catch (e) {
-      setError('Unable to update todo');
-    }
-
-    const newTodosUpdated = todos.map(t => {
-      if (sucessfulUpdatedTodo.includes(t.id)) {
-        return { ...t, completed: !t.completed };
-      }
-
-      return t;
+      setTodos(newTodosUpdated);
+      setFilteredTodos(newTodosUpdated);
+      setEditingTodosId([]);
     });
-
-    setTodos(newTodosUpdated);
-    setFilteredTodos(newTodosUpdated);
-    setEditingTodosId([]);
   }
 
   useEffect(() => {
