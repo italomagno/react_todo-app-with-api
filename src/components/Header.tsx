@@ -11,7 +11,6 @@ interface HeaderProps {
   editingTodosId: number[];
   setTodos: (todos: Todo[]) => void;
   setFilteredTodos: (todos: Todo[]) => void;
-  setIsActiveFilter: (isActive: boolean) => void;
   filteredTodos: Todo[];
 }
 
@@ -32,10 +31,11 @@ export function Header({
     setNewTodoTitle(e.target.value);
   }
 
-  async function handleAddNewTodo(e: React.FormEvent<HTMLFormElement>) {
+  function handleAddNewTodo(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const trimmedTitle = newTodoTitle.trim();
 
-    if (!newTodoTitle.trim()) {
+    if (!trimmedTitle) {
       setError('Title should not be empty');
       inputNewTodo.current?.focus();
 
@@ -46,41 +46,45 @@ export function Header({
       ? todos[todos.length - 1].id + 1
       : 1;
 
-    try {
-      setIsAddingNewTodo(true);
-      setEditingTodosId([...editingTodosId, newTodoIdAvailable]);
+    const newTodo = {
+      title: trimmedTitle,
+      completed: false,
+      id: newTodoIdAvailable,
+    };
 
-      const newTodo = {
-        title: newTodoTitle.trim(),
-        completed: false,
-        id: newTodoIdAvailable,
-      };
+    setIsAddingNewTodo(true);
+    setEditingTodosId([...editingTodosId, newTodoIdAvailable]);
 
-      setFilteredTodos([...todos, newTodo as Todo]);
+    const updatedTodos = [...todos, newTodo as Todo];
 
-      const responseFromAddedTodo = await addTodo(newTodoTitle.trim());
+    setFilteredTodos(updatedTodos);
 
-      setFilteredTodos([...todos].filter(t => t.id !== newTodoIdAvailable));
-      setTodos([...todos, responseFromAddedTodo]);
-      setFilteredTodos([...todos, responseFromAddedTodo]);
-      setNewTodoTitle('');
-    } catch (er) {
-      setEditingTodosId(
-        [...editingTodosId].filter(id => id !== newTodoIdAvailable),
-      );
-      setError('Unable to add a todo');
-      setFilteredTodos([...todos].filter(t => t.id !== newTodoIdAvailable));
-    } finally {
-      setEditingTodosId(editingTodosId.filter(id => id !== newTodoIdAvailable));
+    addTodo(trimmedTitle)
+      .then(responseFromAddedTodo => {
+        const finalTodos = updatedTodos
+          .filter(t => t.id !== newTodoIdAvailable)
+          .concat(responseFromAddedTodo);
 
-      setIsAddingNewTodo(false);
-    }
+        setTodos(finalTodos);
+        setFilteredTodos(finalTodos);
+        setNewTodoTitle('');
+      })
+      .catch(() => {
+        setFilteredTodos(todos);
+        setError('Unable to add a todo');
+      })
+      .finally(() => {
+        setEditingTodosId(
+          editingTodosId.filter(id => id !== newTodoIdAvailable),
+        );
+        setIsAddingNewTodo(false);
+      });
   }
 
   function handleToggleAllTodos() {
     const successfulUpdatedTodo: number[] = [];
-    const hasAllSameStatus = todos.every(t => t.completed);
-    const todosToUpdate = hasAllSameStatus
+    const hasAllCompleted = todos.every(t => t.completed);
+    const todosToUpdate = hasAllCompleted
       ? todos
       : todos.filter(t => !t.completed);
 

@@ -3,7 +3,7 @@ import { Todo } from '../types/Todo';
 
 export interface FooterProps {
   todos: Todo[];
-  isActiveFilter: boolean;
+  isFooterActive: boolean;
   setEditingTodosId: (ids: number[]) => void;
   loadAllTodos: () => void;
   setError: (error: string) => void;
@@ -15,7 +15,7 @@ export interface FooterProps {
 }
 export function Footer({
   todos,
-  isActiveFilter,
+  isFooterActive,
   setEditingTodosId,
   setError,
   editingTodosId,
@@ -69,7 +69,7 @@ export function Footer({
 
   return (
     <>
-      {isActiveFilter && (
+      {isFooterActive && (
         <footer className="todoapp__footer" data-cy="Footer">
           <span className="todo-count" data-cy="TodosCounter">
             {`${todos.filter(t => !t.completed).length} items left`}

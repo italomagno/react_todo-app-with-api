@@ -12,7 +12,7 @@ export const App: React.FC = () => {
   const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [editingTodosId, setEditingTodosId] = useState<number[]>([]);
-  const [isActiveFilter, setIsActiveFilter] = useState(false);
+  const [isFooterActive, setIsFooterActiveFilter] = useState(false);
   const [filter, setFilter] = useState('all');
 
   async function loadAllTodos() {
@@ -20,7 +20,7 @@ export const App: React.FC = () => {
       const loadedTodos = await getTodos();
 
       if (loadedTodos.length > 0) {
-        setIsActiveFilter(true);
+        setIsFooterActiveFilter(true);
       }
 
       setTodos(loadedTodos);
@@ -42,12 +42,12 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (todos.length === 0) {
-      setIsActiveFilter(false);
+      setIsFooterActiveFilter(false);
 
       return;
     }
 
-    setIsActiveFilter(true);
+    setIsFooterActiveFilter(true);
   }, [todos.length]);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export const App: React.FC = () => {
     if (filter === 'active') {
       setFilteredTodos(prev => prev.filter(t => !t.completed));
     }
-  }, [filter, filteredTodos, todos]);
+  }, [filter, todos]);
 
   if (!USER_ID) {
     return <UserWarning />;
@@ -75,7 +75,6 @@ export const App: React.FC = () => {
           editingTodosId={editingTodosId}
           setTodos={setTodos}
           setFilteredTodos={setFilteredTodos}
-          setIsActiveFilter={setIsActiveFilter}
           filteredTodos={filteredTodos}
         />
         <section className="todoapp__main" data-cy="TodoList">
@@ -95,7 +94,7 @@ export const App: React.FC = () => {
           setFilter={setFilter}
           setFilteredTodos={setFilteredTodos}
           todos={todos}
-          isActiveFilter={isActiveFilter}
+          isFooterActive={isFooterActive}
           setEditingTodosId={setEditingTodosId}
           loadAllTodos={loadAllTodos}
           setTodos={setTodos}
